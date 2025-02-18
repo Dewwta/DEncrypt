@@ -31,6 +31,7 @@
             btnOpenFile = new Button();
             inpPassword = new TextBox();
             pnlMain = new Panel();
+            lblPasswordMatch = new Label();
             btnEncrypt = new Button();
             lblPasswordConfirm = new Label();
             lblPassword = new Label();
@@ -41,6 +42,7 @@
             inpPasswordDecrypt = new TextBox();
             btnDecrypt = new Button();
             lblFileInUse = new Label();
+            tbxLog = new TextBox();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -63,10 +65,12 @@
             inpPassword.Name = "inpPassword";
             inpPassword.Size = new Size(200, 34);
             inpPassword.TabIndex = 2;
+            inpPassword.TextChanged += inpPassword_TextChanged;
             // 
             // pnlMain
             // 
             pnlMain.BorderStyle = BorderStyle.FixedSingle;
+            pnlMain.Controls.Add(lblPasswordMatch);
             pnlMain.Controls.Add(btnEncrypt);
             pnlMain.Controls.Add(lblPasswordConfirm);
             pnlMain.Controls.Add(lblPassword);
@@ -77,6 +81,17 @@
             pnlMain.Size = new Size(326, 296);
             pnlMain.TabIndex = 3;
             // 
+            // lblPasswordMatch
+            // 
+            lblPasswordMatch.AutoSize = true;
+            lblPasswordMatch.Font = new Font("Segoe UI", 14F);
+            lblPasswordMatch.ForeColor = Color.Fuchsia;
+            lblPasswordMatch.Location = new Point(13, 111);
+            lblPasswordMatch.Name = "lblPasswordMatch";
+            lblPasswordMatch.Size = new Size(213, 25);
+            lblPasswordMatch.TabIndex = 7;
+            lblPasswordMatch.Text = "Password Doesnt Match";
+            // 
             // btnEncrypt
             // 
             btnEncrypt.Font = new Font("Segoe UI", 15F);
@@ -86,6 +101,7 @@
             btnEncrypt.TabIndex = 6;
             btnEncrypt.Text = "Encrypt";
             btnEncrypt.UseVisualStyleBackColor = true;
+            btnEncrypt.Click += btnEncrypt_Click;
             // 
             // lblPasswordConfirm
             // 
@@ -114,6 +130,7 @@
             inpPasswordConfirm.Name = "inpPasswordConfirm";
             inpPasswordConfirm.Size = new Size(200, 34);
             inpPasswordConfirm.TabIndex = 3;
+            inpPasswordConfirm.TextChanged += inpPasswordConfirm_TextChanged;
             // 
             // pgbProgress
             // 
@@ -160,6 +177,7 @@
             btnDecrypt.TabIndex = 7;
             btnDecrypt.Text = "Decrypt";
             btnDecrypt.UseVisualStyleBackColor = true;
+            btnDecrypt.Click += btnDecrypt_Click;
             // 
             // lblFileInUse
             // 
@@ -171,11 +189,22 @@
             lblFileInUse.TabIndex = 9;
             lblFileInUse.Text = "File: Not Selected";
             // 
+            // tbxLog
+            // 
+            tbxLog.BorderStyle = BorderStyle.FixedSingle;
+            tbxLog.Location = new Point(355, 57);
+            tbxLog.Multiline = true;
+            tbxLog.Name = "tbxLog";
+            tbxLog.ReadOnly = true;
+            tbxLog.Size = new Size(326, 70);
+            tbxLog.TabIndex = 10;
+            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(693, 441);
+            Controls.Add(tbxLog);
             Controls.Add(lblFileInUse);
             Controls.Add(panel1);
             Controls.Add(pgbProgress);
@@ -205,5 +234,7 @@
         private Button btnDecrypt;
         private Label label1;
         private Label lblFileInUse;
+        private Label lblPasswordMatch;
+        private TextBox tbxLog;
     }
 }
