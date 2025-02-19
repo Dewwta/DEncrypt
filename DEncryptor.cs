@@ -112,11 +112,14 @@ namespace DEncrypt
             if (tbxLogs.InvokeRequired)
             {
 
-                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionStart = tbxLogs.TextLength));
-                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionLength = 0));
-                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionColor = color));
-                tbxLogs.Invoke(new Action(() => tbxLogs.AppendText(text)));
-                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionColor = tbxLogs.ForeColor));
+                tbxLogs.Invoke(new Action(() => {
+                    tbxLogs.SelectionStart = tbxLogs.TextLength;
+                    tbxLogs.SelectionLength = 0;
+                    tbxLogs.SelectionColor = color;
+                    tbxLogs.AppendText(text);
+                    tbxLogs.SelectionColor = tbxLogs.ForeColor;
+                }));
+                
             }
             else
             {
@@ -152,6 +155,7 @@ namespace DEncrypt
             {
                 string filePath = files[0];
                 LoadFile(filePath);
+
             }
         }
 
@@ -199,8 +203,8 @@ namespace DEncrypt
         {
             try
             {
-                Log("Loading file...");
-
+                Log($"Loading file: {Path.GetFileName(_filePath)}");
+                Log($"Location: {_filePath}");
                 if (isFileOpen)
                 {
                     var result = MessageBox.Show("Do you want to load a new file?",
@@ -226,6 +230,7 @@ namespace DEncrypt
             catch (Exception ex)
             {
                 MessageBox.Show($"Error loading file: {ex.Message}");
+
             }
         }
 
