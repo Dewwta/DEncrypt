@@ -31,7 +31,7 @@ namespace DEncrypt
                 IntPtr handle = FindWindow(null, "DEncryptor");
                 if (handle != IntPtr.Zero)
                 {
-                    MessageBox.Show("Found window, attempting to send message");
+                    
                     ShowWindow(handle, SW_RESTORE);
                     SetForegroundWindow(handle);
 

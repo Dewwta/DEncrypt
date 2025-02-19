@@ -1,6 +1,8 @@
 using DEncrypt.Core;
 using Microsoft.VisualBasic;
+using System.Diagnostics;
 using System.Runtime.InteropServices;
+using System.Security.Cryptography.X509Certificates;
 
 namespace DEncrypt
 {
@@ -11,19 +13,38 @@ namespace DEncrypt
         private const string SignaturePosition = "Encrypted with doota <3";
         private readonly Guid AppGuid = Guid.Parse("3d9744f9-ca2a-44ba-957e-a05ac696bd6b");
         public static DEncryptor Instance { get; private set; }
-        private bool isFileOpen = false;
+        private static bool isFileOpen = false;
         private bool doesPwMatch = false;
-
+       
         private string fileToLoad = null;
 
         private string[] files_Opened;
 
+        public int _progress;
+        public static int Progress
+        {
+            get
+            {
+                return Progress;
+            }
+
+            set
+            {
+                Instance.OnProgressChanged(Progress);
+            }
+        }
+
+        private void OnProgressChanged(int _progress)
+        {
+            pgbProgress.Value = _progress;
+        }
         #endregion
 
         #region - Runtime Vars -
 
-        FileInfo currentFile;
-
+        public static FileInfo currentFile;
+        public static bool isDecrypting;
+        public static bool isEncrypting;
         #endregion
 
         #region - Form Constructor -
@@ -33,6 +54,8 @@ namespace DEncrypt
             InitializeComponent();
             currentFile = null;
             Instance = this;
+
+            
 
             lsFilesOpened.Items.Clear();
             btnEncrypt.Enabled = false;
@@ -51,6 +74,8 @@ namespace DEncrypt
             this.DragDrop += new DragEventHandler(Form_DragDrop);
 
             Log("Loaded.");
+            lblStatus.Enabled = false;
+            lblStatus.Text = "";
             if (args.Length > 0 && File.Exists(args[0]) && args[0].EndsWith(".dew"))
             {
                 fileToLoad = args[0];
@@ -62,8 +87,9 @@ namespace DEncrypt
 
         #region - Helpers -
 
-        private async void Log(string msg)
+        public void Log(string msg)
         {
+
             AppendColoredText(" " + msg + "\n", Color.LimeGreen);
         }
         private void LogWarning(string msg)
@@ -78,21 +104,61 @@ namespace DEncrypt
 
         }
 
+        private void EnableStatus(bool c)
+        {
+            if (lblStatus.InvokeRequired)
+            {
+                lblStatus.Invoke(new Action(() => lblStatus.Enabled = c));
+                
+            }
+            else
+            {
+                lblStatus.Enabled = c;
+            }
+        }
+
+        private void StatusText(string text)
+        {
+            if (lblStatus.InvokeRequired)
+            {
+                lblStatus.Invoke(new Action(() => lblStatus.Text = text));
+
+            }
+            else
+            {
+                lblStatus.Text = text;
+            }
+        }
+
         private void AppendColoredText(string text, Color color)
         {
-            tbxLogs.SelectionStart = tbxLogs.TextLength;
-            tbxLogs.SelectionLength = 0;
-            tbxLogs.SelectionColor = color; // Set color for new text
-            tbxLogs.AppendText(text);
-            tbxLogs.SelectionColor = tbxLogs.ForeColor; // Reset color
+            if (tbxLogs.InvokeRequired)
+            {
+
+                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionStart = tbxLogs.TextLength));
+                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionLength = 0));
+                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionColor = color));
+                tbxLogs.Invoke(new Action(() => tbxLogs.AppendText(text)));
+                tbxLogs.Invoke(new Action(() => tbxLogs.SelectionColor = tbxLogs.ForeColor));
+            }
+            else
+            {
+                tbxLogs.SelectionStart = tbxLogs.TextLength;
+                tbxLogs.SelectionLength = 0;
+                tbxLogs.SelectionColor = color;
+                tbxLogs.AppendText(text);
+                tbxLogs.SelectionColor = tbxLogs.ForeColor;
+            }
+
+            
         }
 
         private void Form_DragEnter(object sender, DragEventArgs e)
         {
-            // Check if the data contains files
+
             if (e.Data.GetDataPresent(DataFormats.FileDrop))
             {
-                e.Effect = DragDropEffects.Copy; // Show the copy cursor
+                e.Effect = DragDropEffects.Copy;
             }
             else
             {
@@ -107,8 +173,8 @@ namespace DEncrypt
 
             if (files.Length > 0)
             {
-                string filePath = files[0]; // Only take the first file
-                LoadFile(filePath); // Load the file into the application
+                string filePath = files[0];
+                LoadFile(filePath);
             }
         }
 
@@ -118,7 +184,7 @@ namespace DEncrypt
 
             // MessageBox.Show("OnShown Called");
 
-            // If we have a file to load, process it immediately
+
             if (fileToLoad != null)
             {
                 // MessageBox.Show("OnShown If caught");
@@ -139,12 +205,24 @@ namespace DEncrypt
             }
         }
 
+        public void SetBarProgress(int _progress)
+        {
+            if (pgbProgress.InvokeRequired)
+            {
+                pgbProgress.Invoke(new Action(() => pgbProgress.Value = _progress));
+            }
+            else
+            {
+                pgbProgress.Value = _progress;
+            }
+        }
+
         public void LoadFile(string _filePath)
         {
             try
             {
                 Log("Loading file...");
-                // First check if we should prompt to save any existing work
+
                 if (isFileOpen)
                 {
                     var result = MessageBox.Show("Do you want to load a new file?",
@@ -159,7 +237,7 @@ namespace DEncrypt
                 Log("File loaded.");
                 isFileOpen = true;
                 AddBarProgress(100);
-                
+
                 pgbProgress.Value = 0;
                 btnEncrypt.Enabled = true;
                 btnDecrypt.Enabled = true;
@@ -177,7 +255,7 @@ namespace DEncrypt
         {
             if (m.Msg == 0x004A) // WM_COPYDATA
             {
-                
+
                 COPYDATASTRUCT cds = (COPYDATASTRUCT)Marshal.PtrToStructure(m.LParam, typeof(COPYDATASTRUCT));
                 if (cds.cbData > 0)
                 {
@@ -186,9 +264,10 @@ namespace DEncrypt
                     string filePath = System.Text.Encoding.Unicode.GetString(bytes);
 
                     Log("WndProc recieved file, reloading...");
-                    this.Invoke(new Action(() => {
+                    this.Invoke(new Action(() =>
+                    {
                         LoadFile(filePath);
-                        
+
                     }));
                 }
             }
@@ -208,10 +287,11 @@ namespace DEncrypt
 
         private async void AddFileToArr()
         {
-            
+
         }
 
         #endregion
+
         #region - Button Handlers -
         private async void btnOpenFile_Click(object sender, EventArgs e)
         {
@@ -232,9 +312,9 @@ namespace DEncrypt
                         await UpdateUIAsync(currentFile);
                         AddBarProgress(100);
                         isFileOpen = true;
-                        
-                        
-                        
+
+
+
                         btnEncrypt.Enabled = true;
                         btnDecrypt.Enabled = true;
                         inpPassword.ReadOnly = false;
@@ -282,10 +362,24 @@ namespace DEncrypt
 
         #region - Encrypt/Decrypt -
 
-        private void btnEncrypt_Click(object sender, EventArgs e)
+        private async void btnEncrypt_Click(object sender, EventArgs e)
         {
             try
             {
+                lblStatus.Enabled = true;
+                if (isEncrypting)
+                {
+                    
+                    lblStatus.Text = "Error";
+                    MessageBox.Show("An encryption is still ongoing. Please wait for it to finish.");
+                    lblStatus.Enabled = false;
+                    lblStatus.Text = "";
+                }
+                isEncrypting = true;
+                lblStatus.ForeColor = Color.Aqua;
+                lblStatus.Text = "Encrypting...";
+
+                
                 MessageBox.Show("Remember to use a password you can remember! if you lose the password, it cannot be reversed.\nNote: The original file will still exist.");
                 if (string.IsNullOrEmpty(inpPassword.Text) && string.IsNullOrEmpty(inpPasswordConfirm.Text))
                 {
@@ -298,24 +392,27 @@ namespace DEncrypt
                     MessageBox.Show("Passwords do not match!");
                     return;
                 }
-                AddBarProgress(25);
+                
                 string password = inpPassword.Text;
                 string encryptDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Encrypted");
 
                 // Ensure the directory exists
                 Directory.CreateDirectory(encryptDir);
-                AddBarProgress(25);
-                // Create the output file path in the "Encrypted" folder
                 
+                // Create the output file path in the "Encrypted" folder
+
                 string outputFile = Path.Combine(encryptDir, currentFile.Name + ".dew");
-                AddBarProgress(25);
-                Encryptor.EncryptFile(currentFile.FullName, outputFile, password, AppGuid);
-                AddBarProgress(25);
-                MessageBox.Show($"File encrypted successfully!\nSaved to: {outputFile}");
+                
+                Task.Run(async() => Encryptor.EncryptFile(currentFile.FullName, outputFile, password, AppGuid));
+                
+                
                 inpPassword.Text = "";
                 inpPasswordConfirm.Text = "";
+
                 
-                pgbProgress.Value = 0;
+                isEncrypting = false;
+                lblStatus.Enabled = false;
+                lblStatus.Text = "";
 
             }
             catch (Exception ex)
@@ -323,10 +420,22 @@ namespace DEncrypt
                 MessageBox.Show($"Error encrypting file: {ex.Message}");
             }
         }
-        private void btnDecrypt_Click(object sender, EventArgs e)
+        private async void btnDecrypt_Click(object sender, EventArgs e)
         {
             try
             {
+                lblStatus.Enabled = true;
+                if (isDecrypting)
+                {
+                    lblStatus.Text = "Error";
+                    MessageBox.Show("File is still decrypting.");
+                    lblStatus.Enabled = false;
+                    lblStatus.Text = "";
+                }
+                isDecrypting = true;
+
+                lblStatus.ForeColor = Color.Aqua;
+                lblStatus.Text = "Decrypting...";
                 if (!Encryptor.IsFileEncrypted(currentFile.FullName, AppGuid))
                 {
                     MessageBox.Show("This file was not encrypted by this application.");
@@ -349,7 +458,7 @@ namespace DEncrypt
                 string originalFileName = Path.GetFileNameWithoutExtension(currentFile.Name);
                 string outputFile = Path.Combine(decryptDir, originalFileName);
                 AddBarProgress(25);
-                if (Encryptor.DecryptFile(currentFile.FullName, outputFile, password, AppGuid))
+                if (await Encryptor.DecryptFile(currentFile.FullName, outputFile, password, AppGuid))
                 {
                     AddBarProgress(25);
                     MessageBox.Show($"File decrypted successfully!\nSaved to: {outputFile}");
@@ -360,6 +469,9 @@ namespace DEncrypt
                 {
                     MessageBox.Show("Failed to decrypt file. Wrong password or corrupted file.");
                 }
+                isDecrypting = false;
+                lblStatus.Enabled = false;
+                lblStatus.Text = "";
             }
             catch (Exception ex)
             {
@@ -375,11 +487,11 @@ namespace DEncrypt
             if (inpPasswordConfirm.Text == inpPassword.Text)
             {
                 doesPwMatch = true;
-                
+
                 lblPasswordMatch.Text = $"Passwords match!";
                 lblPasswordMatch.ForeColor = Color.LimeGreen;
-                
-                
+
+
             }
             else if (inpPasswordConfirm.Text == "" || inpPassword.Text == "")
             {
@@ -400,7 +512,7 @@ namespace DEncrypt
             if (inpPasswordConfirm.Text == inpPassword.Text)
             {
                 doesPwMatch = true;
-                
+
                 lblPasswordMatch.Text = $"Passwords match!";
                 lblPasswordMatch.ForeColor = Color.LimeGreen;
             }
@@ -419,5 +531,41 @@ namespace DEncrypt
         }
 
         #endregion
+
+        #region - Output Buttons -
+        private void btnEncOutput_Click(object sender, EventArgs e)
+        {
+            string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+            string path = $"{exeDir}Encrypted";
+
+            if (Directory.Exists(path))
+            {
+                Process.Start("explorer.exe", path);
+            }
+            else
+            {
+                MessageBox.Show("If you got this than you did something majorly wrong.");
+                return;
+            }
+        }
+
+        private void btnDecOutput_Click(object sender, EventArgs e)
+        {
+            string exeDir = AppDomain.CurrentDomain.BaseDirectory;
+            string path = $"{exeDir}Decrypted";
+
+            if (Directory.Exists(path))
+            {
+                Process.Start("explorer.exe", path);
+            }
+            else
+            {
+                MessageBox.Show("If you got this than you did something majorly wrong.");
+                return;
+            }
+        }
+
+        #endregion
+
     }
 }

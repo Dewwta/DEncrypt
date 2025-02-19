@@ -45,6 +45,9 @@
             listView1 = new ListView();
             lblFileInUse = new Label();
             tbxLogs = new RichTextBox();
+            btnEncOutput = new Button();
+            btnDecOutput = new Button();
+            lblStatus = new Label();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -223,12 +226,45 @@
             tbxLogs.TabIndex = 10;
             tbxLogs.Text = "";
             // 
+            // btnEncOutput
+            // 
+            btnEncOutput.Location = new Point(501, 57);
+            btnEncOutput.Name = "btnEncOutput";
+            btnEncOutput.Size = new Size(178, 30);
+            btnEncOutput.TabIndex = 11;
+            btnEncOutput.Text = "Encryption Output";
+            btnEncOutput.UseVisualStyleBackColor = true;
+            btnEncOutput.Click += btnEncOutput_Click;
+            // 
+            // btnDecOutput
+            // 
+            btnDecOutput.Location = new Point(501, 93);
+            btnDecOutput.Name = "btnDecOutput";
+            btnDecOutput.Size = new Size(178, 30);
+            btnDecOutput.TabIndex = 12;
+            btnDecOutput.Text = "Decryption Output";
+            btnDecOutput.UseVisualStyleBackColor = true;
+            btnDecOutput.Click += btnDecOutput_Click;
+            // 
+            // lblStatus
+            // 
+            lblStatus.AutoSize = true;
+            lblStatus.Font = new Font("Segoe UI", 13F);
+            lblStatus.Location = new Point(325, 77);
+            lblStatus.Name = "lblStatus";
+            lblStatus.Size = new Size(59, 25);
+            lblStatus.TabIndex = 13;
+            lblStatus.Text = "label2";
+            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Gray;
             ClientSize = new Size(1030, 436);
+            Controls.Add(lblStatus);
+            Controls.Add(btnDecOutput);
+            Controls.Add(btnEncOutput);
             Controls.Add(tbxLogs);
             Controls.Add(lblFileInUse);
             Controls.Add(panel1);
@@ -263,5 +299,8 @@
         private RichTextBox tbxLogs;
         private CheckedListBox lsFilesOpened;
         private ListView listView1;
+        private Button btnEncOutput;
+        private Button btnDecOutput;
+        private Label lblStatus;
     }
 }

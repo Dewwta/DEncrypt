@@ -4,7 +4,10 @@ using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-
+using DEncrypt.Core;
+using Microsoft.VisualBasic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 namespace DEncrypt.Core
 {
     internal class Encryptor
@@ -17,15 +20,17 @@ namespace DEncrypt.Core
 
         
         #region - Encrypt -
-        public static void EncryptFile(string inputFile, string outputFile, string password, Guid fileGuid)
+        public static async void EncryptFile(string inputFile, string outputFile, string password, Guid fileGuid)
         {
+            DEncryptor.Instance.SetBarProgress(0);
+            DEncryptor.Instance.AddBarProgress(15);
             // Generate a random salt
             byte[] salt = new byte[SaltSize];
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(salt);
             }
-
+            DEncryptor.Instance.AddBarProgress(15);
             // Derive key from password
             byte[] key = DeriveKey(password, salt);
 
@@ -35,11 +40,12 @@ namespace DEncrypt.Core
             {
                 rng.GetBytes(iv);
             }
-
+            DEncryptor.Instance.AddBarProgress(15);
             // Create signature using GUID
             string signature = SignaturePrefix + fileGuid.ToString();
+            DEncryptor.Instance.AddBarProgress(15);
             byte[] signatureBytes = Encoding.UTF8.GetBytes(signature);
-
+            DEncryptor.Instance.AddBarProgress(15);
             using (var fsInput = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
             using (var fsOutput = new FileStream(outputFile, FileMode.Create))
             {
@@ -48,7 +54,7 @@ namespace DEncrypt.Core
                 fsOutput.Write(iv, 0, iv.Length);
                 fsOutput.Write(BitConverter.GetBytes(signatureBytes.Length), 0, 4);
                 fsOutput.Write(signatureBytes, 0, signatureBytes.Length);
-
+                DEncryptor.Instance.AddBarProgress(15);
                 // Encrypt the file content
                 using (var aes = Aes.Create())
                 {
@@ -61,13 +67,17 @@ namespace DEncrypt.Core
                     }
                 }
             }
+            DEncryptor.Instance.AddBarProgress(10);
+            
+            MessageBox.Show($"File encrypted successfully!\nSaved to: {outputFile}");
+            DEncryptor.Instance.SetBarProgress(0);
         }
 
         #endregion
 
         #region - Decrypt -
 
-        public static bool DecryptFile(string inputFile, string outputFile, string password, Guid expectedGuid)
+        public static async Task<bool> DecryptFile(string inputFile, string outputFile, string password, Guid expectedGuid)
         {
             try
             {
