@@ -16,7 +16,7 @@ namespace DEncrypt
 
         private string fileToLoad = null;
 
-        private FileInfo[] files_Opened;
+        private string[] files_Opened;
 
         #endregion
 
@@ -34,6 +34,7 @@ namespace DEncrypt
             currentFile = null;
             Instance = this;
 
+            lsFilesOpened.Items.Clear();
             btnEncrypt.Enabled = false;
             btnDecrypt.Enabled = false;
             inpPassword.ReadOnly = true;
@@ -203,6 +204,14 @@ namespace DEncrypt
         }
         #endregion
 
+        #region - File Helpers -
+
+        private async void AddFileToArr()
+        {
+            
+        }
+
+        #endregion
         #region - Button Handlers -
         private async void btnOpenFile_Click(object sender, EventArgs e)
         {
@@ -301,10 +310,11 @@ namespace DEncrypt
                 string outputFile = Path.Combine(encryptDir, currentFile.Name + ".dew");
                 AddBarProgress(25);
                 Encryptor.EncryptFile(currentFile.FullName, outputFile, password, AppGuid);
+                AddBarProgress(25);
                 MessageBox.Show($"File encrypted successfully!\nSaved to: {outputFile}");
                 inpPassword.Text = "";
                 inpPasswordConfirm.Text = "";
-                AddBarProgress(25);
+                
                 pgbProgress.Value = 0;
 
             }

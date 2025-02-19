@@ -31,6 +31,9 @@
             btnOpenFile = new Button();
             inpPassword = new TextBox();
             pnlMain = new Panel();
+            inpPasswordDecrypt = new TextBox();
+            label1 = new Label();
+            btnDecrypt = new Button();
             lblPasswordMatch = new Label();
             btnEncrypt = new Button();
             lblPasswordConfirm = new Label();
@@ -38,9 +41,8 @@
             inpPasswordConfirm = new TextBox();
             pgbProgress = new ProgressBar();
             panel1 = new Panel();
-            label1 = new Label();
-            inpPasswordDecrypt = new TextBox();
-            btnDecrypt = new Button();
+            lsFilesOpened = new CheckedListBox();
+            listView1 = new ListView();
             lblFileInUse = new Label();
             tbxLogs = new RichTextBox();
             pnlMain.SuspendLayout();
@@ -70,6 +72,9 @@
             // pnlMain
             // 
             pnlMain.BorderStyle = BorderStyle.FixedSingle;
+            pnlMain.Controls.Add(inpPasswordDecrypt);
+            pnlMain.Controls.Add(label1);
+            pnlMain.Controls.Add(btnDecrypt);
             pnlMain.Controls.Add(lblPasswordMatch);
             pnlMain.Controls.Add(btnEncrypt);
             pnlMain.Controls.Add(lblPasswordConfirm);
@@ -81,12 +86,41 @@
             pnlMain.Size = new Size(326, 296);
             pnlMain.TabIndex = 3;
             // 
+            // inpPasswordDecrypt
+            // 
+            inpPasswordDecrypt.Font = new Font("Segoe UI", 15F);
+            inpPasswordDecrypt.Location = new Point(92, 197);
+            inpPasswordDecrypt.Name = "inpPasswordDecrypt";
+            inpPasswordDecrypt.Size = new Size(200, 34);
+            inpPasswordDecrypt.TabIndex = 8;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Font = new Font("Segoe UI", 12F);
+            label1.Location = new Point(13, 203);
+            label1.Name = "label1";
+            label1.Size = new Size(79, 21);
+            label1.TabIndex = 9;
+            label1.Text = "Password:";
+            // 
+            // btnDecrypt
+            // 
+            btnDecrypt.Font = new Font("Segoe UI", 15F);
+            btnDecrypt.Location = new Point(13, 250);
+            btnDecrypt.Name = "btnDecrypt";
+            btnDecrypt.Size = new Size(294, 40);
+            btnDecrypt.TabIndex = 7;
+            btnDecrypt.Text = "Decrypt";
+            btnDecrypt.UseVisualStyleBackColor = true;
+            btnDecrypt.Click += btnDecrypt_Click;
+            // 
             // lblPasswordMatch
             // 
             lblPasswordMatch.AutoSize = true;
             lblPasswordMatch.Font = new Font("Segoe UI", 14F);
             lblPasswordMatch.ForeColor = Color.Fuchsia;
-            lblPasswordMatch.Location = new Point(13, 111);
+            lblPasswordMatch.Location = new Point(13, 101);
             lblPasswordMatch.Name = "lblPasswordMatch";
             lblPasswordMatch.Size = new Size(213, 25);
             lblPasswordMatch.TabIndex = 7;
@@ -95,7 +129,7 @@
             // btnEncrypt
             // 
             btnEncrypt.Font = new Font("Segoe UI", 15F);
-            btnEncrypt.Location = new Point(13, 241);
+            btnEncrypt.Location = new Point(13, 139);
             btnEncrypt.Name = "btnEncrypt";
             btnEncrypt.Size = new Size(294, 40);
             btnEncrypt.TabIndex = 6;
@@ -142,42 +176,32 @@
             // panel1
             // 
             panel1.BorderStyle = BorderStyle.FixedSingle;
-            panel1.Controls.Add(label1);
-            panel1.Controls.Add(inpPasswordDecrypt);
-            panel1.Controls.Add(btnDecrypt);
+            panel1.Controls.Add(lsFilesOpened);
+            panel1.Controls.Add(listView1);
             panel1.Location = new Point(355, 133);
             panel1.Name = "panel1";
             panel1.Size = new Size(326, 296);
             panel1.TabIndex = 8;
             // 
-            // label1
+            // lsFilesOpened
             // 
-            label1.AutoSize = true;
-            label1.Font = new Font("Segoe UI", 12F);
-            label1.Location = new Point(12, 32);
-            label1.Name = "label1";
-            label1.Size = new Size(79, 21);
-            label1.TabIndex = 9;
-            label1.Text = "Password:";
+            lsFilesOpened.BackColor = SystemColors.ControlDark;
+            lsFilesOpened.BorderStyle = BorderStyle.None;
+            lsFilesOpened.Font = new Font("Segoe UI", 12F);
+            lsFilesOpened.FormattingEnabled = true;
+            lsFilesOpened.Location = new Point(3, 3);
+            lsFilesOpened.Name = "lsFilesOpened";
+            lsFilesOpened.Size = new Size(320, 288);
+            lsFilesOpened.TabIndex = 11;
             // 
-            // inpPasswordDecrypt
+            // listView1
             // 
-            inpPasswordDecrypt.Font = new Font("Segoe UI", 15F);
-            inpPasswordDecrypt.Location = new Point(101, 26);
-            inpPasswordDecrypt.Name = "inpPasswordDecrypt";
-            inpPasswordDecrypt.Size = new Size(200, 34);
-            inpPasswordDecrypt.TabIndex = 8;
-            // 
-            // btnDecrypt
-            // 
-            btnDecrypt.Font = new Font("Segoe UI", 15F);
-            btnDecrypt.Location = new Point(12, 241);
-            btnDecrypt.Name = "btnDecrypt";
-            btnDecrypt.Size = new Size(294, 40);
-            btnDecrypt.TabIndex = 7;
-            btnDecrypt.Text = "Decrypt";
-            btnDecrypt.UseVisualStyleBackColor = true;
-            btnDecrypt.Click += btnDecrypt_Click;
+            listView1.BackColor = Color.DarkGray;
+            listView1.Location = new Point(-1, -1);
+            listView1.Name = "listView1";
+            listView1.Size = new Size(326, 296);
+            listView1.TabIndex = 10;
+            listView1.UseCompatibleStateImageBehavior = false;
             // 
             // lblFileInUse
             // 
@@ -217,7 +241,6 @@
             pnlMain.ResumeLayout(false);
             pnlMain.PerformLayout();
             panel1.ResumeLayout(false);
-            panel1.PerformLayout();
             ResumeLayout(false);
             PerformLayout();
         }
@@ -238,5 +261,7 @@
         private Label lblFileInUse;
         private Label lblPasswordMatch;
         private RichTextBox tbxLogs;
+        private CheckedListBox lsFilesOpened;
+        private ListView listView1;
     }
 }
