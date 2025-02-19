@@ -97,18 +97,33 @@ namespace DEncrypt.Core
         {
             try
             {
+                if (DEncryptor.isDecrypting)
+                {
+                    MessageBox.Show("Decryption is still ongoing, please wait.");
+                    return false;
+                }
+                DEncryptor.isEncrypting = true;
+
                 using (var fsInput = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
                 {
+                    DEncryptor.Instance.SetBarProgress(0);
+                    DEncryptor.Instance.AddBarProgress(15);
+                    
                     // Read salt and IV
                     byte[] salt = new byte[SaltSize];
                     byte[] iv = new byte[IvSize];
                     fsInput.Read(salt, 0, salt.Length);
                     fsInput.Read(iv, 0, iv.Length);
 
+                    DEncryptor.Instance.AddBarProgress(15);
+
                     // Read signature
                     byte[] signatureLengthBytes = new byte[4];
                     fsInput.Read(signatureLengthBytes, 0, 4);
                     int signatureLength = BitConverter.ToInt32(signatureLengthBytes, 0);
+
+                    DEncryptor.Instance.AddBarProgress(15);
+
                     byte[] signatureBytes = new byte[signatureLength];
                     fsInput.Read(signatureBytes, 0, signatureLength);
                     string signature = Encoding.UTF8.GetString(signatureBytes);
@@ -116,32 +131,36 @@ namespace DEncrypt.Core
                     // Verify signature
                     if (!signature.StartsWith(SignaturePrefix))
                         return false;
-
+                    DEncryptor.Instance.AddBarProgress(15);
                     string guidString = signature.Substring(SignaturePrefix.Length);
                     if (!Guid.TryParse(guidString, out Guid fileGuid) || fileGuid != expectedGuid)
                         return false;
 
                     // Derive key from password
                     byte[] key = DeriveKey(password, salt);
-
+                    DEncryptor.Instance.AddBarProgress(15);
                     using (var fsOutput = new FileStream(outputFile, FileMode.Create))
                     using (var aes = Aes.Create())
                     {
                         aes.Key = key;
                         aes.IV = iv;
-
+                        DEncryptor.Instance.AddBarProgress(15);
                         using (var cs = new CryptoStream(fsInput, aes.CreateDecryptor(), CryptoStreamMode.Read))
                         {
                             cs.CopyTo(fsOutput);
                         }
                     }
-
+                    DEncryptor.Instance.AddBarProgress(10);
+                    DEncryptor.isDecrypting = false;
                     return true;
                 }
             }
-            catch
+            catch (Exception ex)
             {
+                DEncryptor.Instance.LogError($"File signature does not match. Make sure this file was encrypted with this tool\nERR: {ex.Message}");
+                DEncryptor.isDecrypting = false;
                 return false;
+
             }
         }
         #endregion

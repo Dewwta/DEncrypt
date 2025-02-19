@@ -47,7 +47,6 @@
             tbxLogs = new RichTextBox();
             btnEncOutput = new Button();
             btnDecOutput = new Button();
-            lblStatus = new Label();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -246,23 +245,12 @@
             btnDecOutput.UseVisualStyleBackColor = true;
             btnDecOutput.Click += btnDecOutput_Click;
             // 
-            // lblStatus
-            // 
-            lblStatus.AutoSize = true;
-            lblStatus.Font = new Font("Segoe UI", 13F);
-            lblStatus.Location = new Point(325, 77);
-            lblStatus.Name = "lblStatus";
-            lblStatus.Size = new Size(59, 25);
-            lblStatus.TabIndex = 13;
-            lblStatus.Text = "label2";
-            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Gray;
             ClientSize = new Size(1030, 436);
-            Controls.Add(lblStatus);
             Controls.Add(btnDecOutput);
             Controls.Add(btnEncOutput);
             Controls.Add(tbxLogs);
@@ -301,6 +289,5 @@
         private ListView listView1;
         private Button btnEncOutput;
         private Button btnDecOutput;
-        private Label lblStatus;
     }
 }

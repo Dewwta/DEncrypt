@@ -73,9 +73,8 @@ namespace DEncrypt
             this.DragEnter += new DragEventHandler(Form_DragEnter);
             this.DragDrop += new DragEventHandler(Form_DragDrop);
 
-            Log("Loaded.");
-            lblStatus.Enabled = false;
-            lblStatus.Text = "";
+            
+            
             if (args.Length > 0 && File.Exists(args[0]) && args[0].EndsWith(".dew"))
             {
                 fileToLoad = args[0];
@@ -92,43 +91,21 @@ namespace DEncrypt
 
             AppendColoredText(" " + msg + "\n", Color.LimeGreen);
         }
-        private void LogWarning(string msg)
+        public void LogWarning(string msg)
         {
             AppendColoredText(" " + msg + "\n", Color.Yellow);
 
         }
 
-        private void LogError(string msg)
+        public void LogError(string msg)
         {
             AppendColoredText(" " + msg + "\n", Color.Red);
 
         }
 
-        private void EnableStatus(bool c)
-        {
-            if (lblStatus.InvokeRequired)
-            {
-                lblStatus.Invoke(new Action(() => lblStatus.Enabled = c));
-                
-            }
-            else
-            {
-                lblStatus.Enabled = c;
-            }
-        }
+        
 
-        private void StatusText(string text)
-        {
-            if (lblStatus.InvokeRequired)
-            {
-                lblStatus.Invoke(new Action(() => lblStatus.Text = text));
-
-            }
-            else
-            {
-                lblStatus.Text = text;
-            }
-        }
+        
 
         private void AppendColoredText(string text, Color color)
         {
@@ -217,6 +194,7 @@ namespace DEncrypt
             }
         }
 
+        // used for loading a file, this is a seperate method then Open File Button.
         public void LoadFile(string _filePath)
         {
             try
@@ -251,6 +229,7 @@ namespace DEncrypt
             }
         }
 
+        // When message is received from the new window, it invokes the load file method with the message contents.
         protected override void WndProc(ref Message m)
         {
             if (m.Msg == 0x004A) // WM_COPYDATA
@@ -274,6 +253,12 @@ namespace DEncrypt
             base.WndProc(ref m);
         }
 
+        /* This struct is used to copy data from one process to another,
+         * when you open a second .dew file, it will open another window.
+         * This allows the new instance to kill itself, but not before messaging
+         * the original instance with the new data. 
+        */
+       
         [StructLayout(LayoutKind.Sequential)]
         private struct COPYDATASTRUCT
         {
@@ -411,18 +396,9 @@ namespace DEncrypt
         {
             try
             {
-                lblStatus.Enabled = true;
-                if (isDecrypting)
-                {
-                    lblStatus.Text = "Error";
-                    MessageBox.Show("File is still decrypting.");
-                    lblStatus.Enabled = false;
-                    lblStatus.Text = "";
-                }
-                isDecrypting = true;
+                
 
-                lblStatus.ForeColor = Color.Aqua;
-                lblStatus.Text = "Decrypting...";
+                
                 if (!Encryptor.IsFileEncrypted(currentFile.FullName, AppGuid))
                 {
                     MessageBox.Show("This file was not encrypted by this application.");
@@ -434,20 +410,20 @@ namespace DEncrypt
                     MessageBox.Show("Please enter a password");
                     return;
                 }
-                AddBarProgress(25);
+                
                 string password = inpPasswordDecrypt.Text;
                 string decryptDir = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Decrypted");
 
                 // Ensure the directory exists
                 Directory.CreateDirectory(decryptDir);
-                AddBarProgress(25);
+                
                 // Remove the ".dew" extension to restore original file name
                 string originalFileName = Path.GetFileNameWithoutExtension(currentFile.Name);
                 string outputFile = Path.Combine(decryptDir, originalFileName);
-                AddBarProgress(25);
+                
                 if (await Encryptor.DecryptFile(currentFile.FullName, outputFile, password, AppGuid))
                 {
-                    AddBarProgress(25);
+                    
                     MessageBox.Show($"File decrypted successfully!\nSaved to: {outputFile}");
                     pgbProgress.Value = 0;
                     inpPasswordDecrypt.Text = "";
@@ -455,10 +431,10 @@ namespace DEncrypt
                 else
                 {
                     MessageBox.Show("Failed to decrypt file. Wrong password or corrupted file.");
+                    DEncryptor.Instance.SetBarProgress(0);
                 }
                 isDecrypting = false;
-                lblStatus.Enabled = false;
-                lblStatus.Text = "";
+                
             }
             catch (Exception ex)
             {
