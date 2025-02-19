@@ -10,9 +10,16 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Resource Include="Images\DEncrypt_Icon.ico">
+    <None Remove="Images\DEncrypt_Icon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Images\DEncrypt_Icon.ico">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </EmbeddedResource>
+    <EmbeddedResource Include="Images\DEncrypt_Icon.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </EmbeddedResource>
   </ItemGroup>
 
 </Project>

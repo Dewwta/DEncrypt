@@ -12,6 +12,8 @@ namespace DEncrypt
         private bool isFileOpen = false;
         private bool doesPwMatch = false;
 
+        private string fileToLoad = null;
+
 
         #endregion
 
@@ -23,7 +25,7 @@ namespace DEncrypt
 
         #region - Form Constructor -
 
-        public DEncryptor()
+        public DEncryptor(string[] args)
         {
             InitializeComponent();
             currentFile = null;
@@ -35,13 +37,35 @@ namespace DEncrypt
             inpPasswordConfirm.ReadOnly = true;
             inpPasswordDecrypt.ReadOnly = true;
 
+            string exePath = Directory.GetCurrentDirectory();
 
-            
+            // MessageBox.Show("Before file constructor");
+            this.Icon = new Icon(Path.Combine(exePath, "Images/DEncrypt_Icon.ico"));
+            if (args.Length > 0 && File.Exists(args[0]) && args[0].EndsWith(".dew"))
+            {
+                fileToLoad = args[0];
+                // MessageBox.Show("constructor if loaded");
+            }
         }
 
         #endregion
 
         #region - Helpers -
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            // MessageBox.Show("OnShown Called");
+
+            // If we have a file to load, process it immediately
+            if (fileToLoad != null)
+            {
+                // MessageBox.Show("OnShown If caught");
+                LoadFile(fileToLoad);
+                UpdateUI();
+            }
+        }
 
         public void AddBarProgress(int _progress)
         {
@@ -55,6 +79,27 @@ namespace DEncrypt
             }
         }
 
+        private void LoadFile(string _filePath)
+        {
+            try
+            {
+                currentFile = new FileInfo(_filePath);
+                isFileOpen = true;
+
+
+
+                btnEncrypt.Enabled = true;
+                btnDecrypt.Enabled = true;
+                inpPassword.ReadOnly = false;
+                inpPasswordConfirm.ReadOnly = false;
+                inpPasswordDecrypt.ReadOnly = false;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating FileInfo Object: {ex.Message}");
+            }
+        }
+
         #endregion
 
         #region - Button Handlers -
@@ -62,6 +107,7 @@ namespace DEncrypt
         {
             using (OpenFileDialog ofd = new OpenFileDialog())
             {
+                pgbProgress.Value = 0;
                 ofd.Title = "Select a File";
 
                 if (ofd.ShowDialog() == DialogResult.OK)
@@ -73,12 +119,12 @@ namespace DEncrypt
                         FileInfo fi = new FileInfo(ofd.FileName);
 
                         currentFile = fi;
-                        UpdateUI(currentFile);
-                        
-                        isFileOpen = true;
+                        await UpdateUIAsync(currentFile);
                         AddBarProgress(100);
-                        MessageBox.Show("File loaded Successfully!");
-                        pgbProgress.Value = 0;
+                        isFileOpen = true;
+                        
+                        
+                        
                         btnEncrypt.Enabled = true;
                         btnDecrypt.Enabled = true;
                         inpPassword.ReadOnly = false;
@@ -104,13 +150,21 @@ namespace DEncrypt
         #endregion
 
         #region - UI Helpers -
-        private async Task UpdateUI(FileInfo _fi)
+        private async Task UpdateUIAsync(FileInfo _fi)
         {
-            string fileName = _fi.Name;
+            string fileName = currentFile.Name;
             string trimmed = Path.GetFileName(fileName);
 
             lblFileInUse.Text = $"File: {fileName}";
 
+        }
+
+        private void UpdateUI()
+        {
+            string fileName = currentFile.Name;
+            string trimmed = Path.GetFileName(fileName);
+
+            lblFileInUse.Text = $"File: {fileName}";
         }
 
 
@@ -142,8 +196,8 @@ namespace DEncrypt
                 Directory.CreateDirectory(encryptDir);
                 AddBarProgress(25);
                 // Create the output file path in the "Encrypted" folder
-                string trimmedName = currentFile.Name.Remove(currentFile.Name.Length - 4);
-                string outputFile = Path.Combine(encryptDir, trimmedName + "_ENC" + ".dew");
+                
+                string outputFile = Path.Combine(encryptDir, currentFile.Name + ".dew");
                 AddBarProgress(25);
                 Encryptor.EncryptFile(currentFile.FullName, outputFile, password, AppGuid);
                 MessageBox.Show($"File encrypted successfully!\nSaved to: {outputFile}");
@@ -216,6 +270,12 @@ namespace DEncrypt
                 
                 
             }
+            else if (inpPasswordConfirm.Text == "" || inpPassword.Text == "")
+            {
+                doesPwMatch = false;
+                lblPasswordMatch.Text = $"Passwords do not match.";
+                lblPasswordMatch.ForeColor = Color.Red;
+            }
             else
             {
                 doesPwMatch = false;
@@ -232,6 +292,12 @@ namespace DEncrypt
                 
                 lblPasswordMatch.Text = $"Passwords match!";
                 lblPasswordMatch.ForeColor = Color.LimeGreen;
+            }
+            else if (inpPasswordConfirm.Text == "" || inpPassword.Text == "")
+            {
+                doesPwMatch = false;
+                lblPasswordMatch.Text = $"Passwords do not match.";
+                lblPasswordMatch.ForeColor = Color.Red;
             }
             else
             {

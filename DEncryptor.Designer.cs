@@ -42,7 +42,6 @@
             inpPasswordDecrypt = new TextBox();
             btnDecrypt = new Button();
             lblFileInUse = new Label();
-            tbxLog = new TextBox();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -189,27 +188,18 @@
             lblFileInUse.TabIndex = 9;
             lblFileInUse.Text = "File: Not Selected";
             // 
-            // tbxLog
-            // 
-            tbxLog.BorderStyle = BorderStyle.FixedSingle;
-            tbxLog.Location = new Point(355, 57);
-            tbxLog.Multiline = true;
-            tbxLog.Name = "tbxLog";
-            tbxLog.ReadOnly = true;
-            tbxLog.Size = new Size(326, 70);
-            tbxLog.TabIndex = 10;
-            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
+            BackColor = SystemColors.ActiveCaption;
             ClientSize = new Size(693, 441);
-            Controls.Add(tbxLog);
             Controls.Add(lblFileInUse);
             Controls.Add(panel1);
             Controls.Add(pgbProgress);
             Controls.Add(pnlMain);
             Controls.Add(btnOpenFile);
+            FormBorderStyle = FormBorderStyle.FixedSingle;
             Name = "DEncryptor";
             Text = "DEncryptor... By doota <3";
             pnlMain.ResumeLayout(false);
@@ -235,6 +225,5 @@
         private Label label1;
         private Label lblFileInUse;
         private Label lblPasswordMatch;
-        private TextBox tbxLog;
     }
 }
