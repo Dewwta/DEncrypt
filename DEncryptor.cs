@@ -366,18 +366,7 @@ namespace DEncrypt
         {
             try
             {
-                lblStatus.Enabled = true;
-                if (isEncrypting)
-                {
-                    
-                    lblStatus.Text = "Error";
-                    MessageBox.Show("An encryption is still ongoing. Please wait for it to finish.");
-                    lblStatus.Enabled = false;
-                    lblStatus.Text = "";
-                }
-                isEncrypting = true;
-                lblStatus.ForeColor = Color.Aqua;
-                lblStatus.Text = "Encrypting...";
+                
 
                 
                 MessageBox.Show("Remember to use a password you can remember! if you lose the password, it cannot be reversed.\nNote: The original file will still exist.");
@@ -410,9 +399,7 @@ namespace DEncrypt
                 inpPasswordConfirm.Text = "";
 
                 
-                isEncrypting = false;
-                lblStatus.Enabled = false;
-                lblStatus.Text = "";
+                
 
             }
             catch (Exception ex)

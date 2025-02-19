@@ -22,14 +22,28 @@ namespace DEncrypt.Core
         #region - Encrypt -
         public static async void EncryptFile(string inputFile, string outputFile, string password, Guid fileGuid)
         {
+            // Check if encryption is going on
+            if (DEncryptor.isEncrypting)
+            {
+                MessageBox.Show("Encryption is still processing. Please wait for it to finish");
+                return;
+            }
+            DEncryptor.isEncrypting = true;
+
+            // log the encryption process for less gray areas.
+            DEncryptor.Instance.Log($"Encrypting {Path.GetFileName(inputFile)}");
+
+
             DEncryptor.Instance.SetBarProgress(0);
             DEncryptor.Instance.AddBarProgress(15);
+            
             // Generate a random salt
             byte[] salt = new byte[SaltSize];
             using (var rng = new RNGCryptoServiceProvider())
             {
                 rng.GetBytes(salt);
             }
+
             DEncryptor.Instance.AddBarProgress(15);
             // Derive key from password
             byte[] key = DeriveKey(password, salt);
@@ -70,7 +84,9 @@ namespace DEncrypt.Core
             DEncryptor.Instance.AddBarProgress(10);
             
             MessageBox.Show($"File encrypted successfully!\nSaved to: {outputFile}");
+            DEncryptor.Instance.Log($"Encryption Finished: {outputFile}.");
             DEncryptor.Instance.SetBarProgress(0);
+            DEncryptor.isEncrypting = false;
         }
 
         #endregion
