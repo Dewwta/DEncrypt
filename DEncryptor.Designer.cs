@@ -47,6 +47,7 @@
             tbxLogs = new RichTextBox();
             btnEncOutput = new Button();
             btnDecOutput = new Button();
+            lblCredits = new Label();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -245,12 +246,23 @@
             btnDecOutput.UseVisualStyleBackColor = true;
             btnDecOutput.Click += btnDecOutput_Click;
             // 
+            // lblCredits
+            // 
+            lblCredits.AutoSize = true;
+            lblCredits.ForeColor = Color.Magenta;
+            lblCredits.Location = new Point(12, 435);
+            lblCredits.Name = "lblCredits";
+            lblCredits.Size = new Size(158, 15);
+            lblCredits.TabIndex = 13;
+            lblCredits.Text = "DEncryptor V1.16 by Dewwta";
+            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.Gray;
-            ClientSize = new Size(1030, 436);
+            ClientSize = new Size(1030, 459);
+            Controls.Add(lblCredits);
             Controls.Add(btnDecOutput);
             Controls.Add(btnEncOutput);
             Controls.Add(tbxLogs);
@@ -289,5 +301,6 @@
         private ListView listView1;
         private Button btnEncOutput;
         private Button btnDecOutput;
+        private Label lblCredits;
     }
 }

@@ -21,23 +21,7 @@ namespace DEncrypt
         private string[] files_Opened;
 
         public int _progress;
-        public static int Progress
-        {
-            get
-            {
-                return Progress;
-            }
-
-            set
-            {
-                Instance.OnProgressChanged(Progress);
-            }
-        }
-
-        private void OnProgressChanged(int _progress)
-        {
-            pgbProgress.Value = _progress;
-        }
+        
         #endregion
 
         #region - Runtime Vars -
@@ -68,7 +52,7 @@ namespace DEncrypt
             this.Text = "DEncryptor";
             // MessageBox.Show("Before file constructor");
             this.Icon = new Icon(Path.Combine(exePath, "Images/DEncrypt_Icon.ico"));
-
+            this.MaximizeBox = false;
             this.AllowDrop = true;
             this.DragEnter += new DragEventHandler(Form_DragEnter);
             this.DragDrop += new DragEventHandler(Form_DragDrop);

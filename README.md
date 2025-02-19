@@ -8,7 +8,7 @@ DEncryptor is a simple file encryption tool written in **C#** using **WinForms**
 - **User-Friendly UI**: Built with a simple and intuitive WinForms interface.
 - **Encryption Signature Check**: Ensures that only files encrypted with DEncryptor can be decrypted.
 - **Drag-and-Drop Support**: Allow users to drag files into the application for quick selection.
-
+- **AES**: Uses AES encryption
 ## Coming Soon
 - **Batch File Encryption**: Ability to encrypt multiple files at once.
 - **Customizable Encryption Algorithms**: Support for selecting different encryption methods.
