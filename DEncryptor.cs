@@ -1,4 +1,6 @@
 using DEncrypt.Core;
+using Microsoft.VisualBasic;
+using System.Runtime.InteropServices;
 
 namespace DEncrypt
 {
@@ -14,6 +16,7 @@ namespace DEncrypt
 
         private string fileToLoad = null;
 
+        private FileInfo[] files_Opened;
 
         #endregion
 
@@ -38,9 +41,15 @@ namespace DEncrypt
             inpPasswordDecrypt.ReadOnly = true;
 
             string exePath = Directory.GetCurrentDirectory();
-
+            this.Text = "DEncryptor";
             // MessageBox.Show("Before file constructor");
             this.Icon = new Icon(Path.Combine(exePath, "Images/DEncrypt_Icon.ico"));
+
+            this.AllowDrop = true;
+            this.DragEnter += new DragEventHandler(Form_DragEnter);
+            this.DragDrop += new DragEventHandler(Form_DragDrop);
+
+            Log("Loaded.");
             if (args.Length > 0 && File.Exists(args[0]) && args[0].EndsWith(".dew"))
             {
                 fileToLoad = args[0];
@@ -51,6 +60,56 @@ namespace DEncrypt
         #endregion
 
         #region - Helpers -
+
+        private async void Log(string msg)
+        {
+            AppendColoredText(" " + msg + "\n", Color.LimeGreen);
+        }
+        private void LogWarning(string msg)
+        {
+            AppendColoredText(" " + msg + "\n", Color.Yellow);
+
+        }
+
+        private void LogError(string msg)
+        {
+            AppendColoredText(" " + msg + "\n", Color.Red);
+
+        }
+
+        private void AppendColoredText(string text, Color color)
+        {
+            tbxLogs.SelectionStart = tbxLogs.TextLength;
+            tbxLogs.SelectionLength = 0;
+            tbxLogs.SelectionColor = color; // Set color for new text
+            tbxLogs.AppendText(text);
+            tbxLogs.SelectionColor = tbxLogs.ForeColor; // Reset color
+        }
+
+        private void Form_DragEnter(object sender, DragEventArgs e)
+        {
+            // Check if the data contains files
+            if (e.Data.GetDataPresent(DataFormats.FileDrop))
+            {
+                e.Effect = DragDropEffects.Copy; // Show the copy cursor
+            }
+            else
+            {
+                e.Effect = DragDropEffects.None;
+            }
+        }
+
+        private void Form_DragDrop(object sender, DragEventArgs e)
+        {
+            // Get dropped files
+            string[] files = (string[])e.Data.GetData(DataFormats.FileDrop);
+
+            if (files.Length > 0)
+            {
+                string filePath = files[0]; // Only take the first file
+                LoadFile(filePath); // Load the file into the application
+            }
+        }
 
         protected override void OnShown(EventArgs e)
         {
@@ -79,15 +138,28 @@ namespace DEncrypt
             }
         }
 
-        private void LoadFile(string _filePath)
+        public void LoadFile(string _filePath)
         {
             try
             {
+                Log("Loading file...");
+                // First check if we should prompt to save any existing work
+                if (isFileOpen)
+                {
+                    var result = MessageBox.Show("Do you want to load a new file?",
+                        "Load New File", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                    if (result == DialogResult.No)
+                        return;
+                }
+
                 currentFile = new FileInfo(_filePath);
+                UpdateUI();
+                Log("File loaded.");
                 isFileOpen = true;
-
-
-
+                AddBarProgress(100);
+                
+                pgbProgress.Value = 0;
                 btnEncrypt.Enabled = true;
                 btnDecrypt.Enabled = true;
                 inpPassword.ReadOnly = false;
@@ -96,10 +168,39 @@ namespace DEncrypt
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"Error creating FileInfo Object: {ex.Message}");
+                MessageBox.Show($"Error loading file: {ex.Message}");
             }
         }
 
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == 0x004A) // WM_COPYDATA
+            {
+                
+                COPYDATASTRUCT cds = (COPYDATASTRUCT)Marshal.PtrToStructure(m.LParam, typeof(COPYDATASTRUCT));
+                if (cds.cbData > 0)
+                {
+                    byte[] bytes = new byte[cds.cbData - 1];
+                    Marshal.Copy(cds.lpData, bytes, 0, bytes.Length);
+                    string filePath = System.Text.Encoding.Unicode.GetString(bytes);
+
+                    Log("WndProc recieved file, reloading...");
+                    this.Invoke(new Action(() => {
+                        LoadFile(filePath);
+                        
+                    }));
+                }
+            }
+            base.WndProc(ref m);
+        }
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct COPYDATASTRUCT
+        {
+            public IntPtr dwData;
+            public int cbData;
+            public IntPtr lpData;
+        }
         #endregion
 
         #region - Button Handlers -

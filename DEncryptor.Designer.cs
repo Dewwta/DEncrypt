@@ -42,6 +42,7 @@
             inpPasswordDecrypt = new TextBox();
             btnDecrypt = new Button();
             lblFileInUse = new Label();
+            tbxLogs = new RichTextBox();
             pnlMain.SuspendLayout();
             panel1.SuspendLayout();
             SuspendLayout();
@@ -188,12 +189,23 @@
             lblFileInUse.TabIndex = 9;
             lblFileInUse.Text = "File: Not Selected";
             // 
+            // tbxLogs
+            // 
+            tbxLogs.BackColor = Color.FromArgb(64, 64, 64);
+            tbxLogs.ForeColor = Color.White;
+            tbxLogs.Location = new Point(685, 12);
+            tbxLogs.Name = "tbxLogs";
+            tbxLogs.Size = new Size(340, 417);
+            tbxLogs.TabIndex = 10;
+            tbxLogs.Text = "";
+            // 
             // DEncryptor
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            BackColor = SystemColors.ActiveCaption;
-            ClientSize = new Size(693, 441);
+            BackColor = Color.Gray;
+            ClientSize = new Size(1030, 436);
+            Controls.Add(tbxLogs);
             Controls.Add(lblFileInUse);
             Controls.Add(panel1);
             Controls.Add(pgbProgress);
@@ -225,5 +237,6 @@
         private Label label1;
         private Label lblFileInUse;
         private Label lblPasswordMatch;
+        private RichTextBox tbxLogs;
     }
 }
