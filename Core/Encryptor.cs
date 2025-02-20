@@ -102,7 +102,7 @@ namespace DEncrypt.Core
                     MessageBox.Show("Decryption is still ongoing, please wait.");
                     return false;
                 }
-                DEncryptor.isEncrypting = true;
+                DEncryptor.isDecrypting = true;
 
                 using (var fsInput = new FileStream(inputFile, FileMode.Open, FileAccess.Read))
                 {
@@ -151,6 +151,7 @@ namespace DEncrypt.Core
                         }
                     }
                     DEncryptor.Instance.AddBarProgress(10);
+                    
                     DEncryptor.isDecrypting = false;
                     return true;
                 }

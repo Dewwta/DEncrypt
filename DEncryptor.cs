@@ -414,15 +414,16 @@ namespace DEncrypt
                 {
                     
                     MessageBox.Show($"File decrypted successfully!\nSaved to: {outputFile}");
-                    pgbProgress.Value = 0;
+                    
                     inpPasswordDecrypt.Text = "";
+                    SetBarProgress(0);
                 }
                 else
                 {
                     MessageBox.Show("Failed to decrypt file. Wrong password or corrupted file.");
-                    DEncryptor.Instance.SetBarProgress(0);
+                    SetBarProgress(0);
                 }
-                isDecrypting = false;
+                
                 
             }
             catch (Exception ex)
